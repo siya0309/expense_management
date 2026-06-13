@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Dashboard</h1>
+
+<div class="card-container">
+
+    <div class="card">
+        <h3>Total Income</h3>
+        <p>₹{{ total_income }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Expense</h3>
+        <p>₹{{ total_expense }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Balance</h3>
+        <p>₹{{ balance }}</p>
+    </div>
+
+</div>
+
+<div class="recent-section">
+
+    <h2>Recent Transactions</h2>
+
+    <table>
+
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Amount</th>
+        </tr>
+
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.category }}</td>
+            <td>₹{{ expense.amount }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</div>
+
+{% endblock %}
