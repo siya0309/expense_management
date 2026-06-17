@@ -1,24 +1,50 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h2>Add Expense</h2>
+{% block page_title %}
+Add Expense
+{% endblock %}
 
-<form method="POST">
-    Amount: <input type="number" name="amount" required><br><br>
-    
-    Category: 
-    <select name="category">
-        <option>Food</option>
-        <option>Transport</option>
-        <option>Shopping</option>
-        <option>Other</option>
-    </select><br><br>
-    
-    Date: <input type="date" name="date"><br><br>
-    
-    Description: <input type="text" name="description"><br><br>
-    
-    <button type="submit">Add Expense</button>
-</form>
+{% block content %}
+
+<div class="form-card">
+
+    <h2>Add Expense</h2>
+
+    <form action="/add_expense" method="POST">
+
+        <input type="number"
+               step="0.01"
+               name="amount"
+               placeholder="Amount"
+               required>
+
+        <select name="category" required>
+
+            <option value="">Select Category</option>
+
+            <option>Food</option>
+            <option>Travel</option>
+            <option>Shopping</option>
+            <option>Education</option>
+            <option>Bills</option>
+
+        </select>
+
+        <input type="date"
+               name="date"
+               required>
+
+        <textarea
+            name="description"
+            placeholder="Description">
+        </textarea>
+
+        <button type="submit">
+            Save Expense
+        </button>
+
+    </form>
+
+</div>
 
 {% endblock %}

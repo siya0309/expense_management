@@ -7,7 +7,7 @@ create table users(user_id int auto_increment primary key,
     );
 create table income(income_id int auto_increment primary key,
 	user_id int,
-    Amount decimal(10,2),
+    amount decimal(10,2),
     source varchar(100),
     date date,
     foreign key(user_id) references users(user_id)

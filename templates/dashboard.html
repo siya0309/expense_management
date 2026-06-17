@@ -1,46 +1,72 @@
 {% extends "base.html" %}
 
+{% block page_title %}
+Dashboard
+{% endblock %}
+
 {% block content %}
 
-<h1>Dashboard</h1>
+<!-- Stats Cards -->
 
-<div class="card-container">
+<div class="stats-grid">
 
-    <div class="card">
-        <h3>Total Income</h3>
-        <p>₹{{ total_income }}</p>
+    <div class="card income-card">
+
+        <h4>Total Income</h4>
+
+        <h2>₹{{ total_income }}</h2>
+
     </div>
 
-    <div class="card">
-        <h3>Total Expense</h3>
-        <p>₹{{ total_expense }}</p>
+    <div class="card expense-card">
+
+        <h4>Total Expense</h4>
+
+        <h2>₹{{ total_expense }}</h2>
+
     </div>
 
-    <div class="card">
-        <h3>Balance</h3>
-        <p>₹{{ balance }}</p>
+    <div class="card balance-card">
+
+        <h4>Current Balance</h4>
+
+        <h2>₹{{ balance }}</h2>
+
     </div>
 
 </div>
 
-<div class="recent-section">
+<br>
 
-    <h2>Recent Transactions</h2>
+<!-- Recent Transactions -->
+
+<div class="table-card">
+
+    <h3>Recent Expenses</h3>
 
     <table>
 
         <tr>
             <th>Date</th>
             <th>Category</th>
+            <th>Description</th>
             <th>Amount</th>
         </tr>
 
-        {% for expense in expenses %}
+        {% for item in recent_expenses %}
+
         <tr>
-            <td>{{ expense.date }}</td>
-            <td>{{ expense.category }}</td>
-            <td>₹{{ expense.amount }}</td>
+
+            <td>{{ item.date }}</td>
+
+            <td>{{ item.category }}</td>
+
+            <td>{{ item.description }}</td>
+
+            <td>₹{{ item.amount }}</td>
+
         </tr>
+
         {% endfor %}
 
     </table>

@@ -10,8 +10,7 @@ app.secret_key = "mysecret123"
 def home():
     return redirect('/login')
 
-conn = get_connection()   # get connection
-cursor = conn.cursor()    # create cursor
+
 # SIGNUP
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -44,24 +43,56 @@ def signup():
 
 @app.route('/dashboard')
 def dashboard():
+
     conn = get_connection()
 
-    import pandas as pd
+    expense_df = pd.read_sql(
+        "SELECT * FROM expense WHERE user_id=%s",
+        conn,
+        params=[session['user_id']]
+    )
 
+    income_df = pd.read_sql(
+        "SELECT * FROM income WHERE user_id=%s",
+        conn,
+        params=[session['user_id']]
+    )
 
-    df = pd.read_sql("SELECT * FROM expense", conn)
+    total_expense = expense_df['amount'].sum() if not expense_df.empty else 0
+    total_income = income_df['amount'].sum() if not income_df.empty else 0
 
-    total_expense = df['amount'].sum()
+    balance = total_income - total_expense
 
-    category_summary = df.groupby('category')['amount'].sum()
+    category_summary = {}
 
-    # Create pie chart
+    if not expense_df.empty:
+        category_summary = (
+            expense_df.groupby('category')['amount']
+            .sum()
+            .to_dict()
+        )
 
+    recent_expenses = []
+
+    if not expense_df.empty:
+        recent_expenses = (
+            expense_df.sort_values(
+                by='date',
+                ascending=False
+            )
+            .head(5)
+            .to_dict('records')
+        )
+
+    conn.close()
 
     return render_template(
         'dashboard.html',
+        total_income=total_income,
         total_expense=total_expense,
-        category_summary=category_summary.to_dict()
+        balance=balance,
+        category_summary=category_summary,
+        recent_expenses=recent_expenses
     )
 # LOGIN PAGE
 @app.route('/login', methods=['GET', 'POST'])
@@ -114,54 +145,84 @@ def income_page():
 
 
 # ADD EXPENSE
-@app.route("/add_expense", methods=["POST"])
+@app.route('/add_expense', methods=['POST'])
 def add_expense():
 
-    user_id = request.form["us" \
-    "er_id"]
-    amount = request.form["Amount"]
-    category = request.form["category"]
-    date = request.form["date"]
-    description = request.form["description"]
+    user_id = session['user_id']
+    amount = request.form['amount']
+    category = request.form['category']
+    date = request.form['date']
+    description = request.form['description']
+
+    conn = get_connection()
+    cursor = conn.cursor()
 
     query = """
-    INSERT INTO expense (user_id, amount, category, date, description)
+    INSERT INTO expense
+    (user_id, amount, category, date, description)
     VALUES (%s,%s,%s,%s,%s)
     """
 
-    cursor.execute(query,(user_id,amount,category,date,description))
-    db.commit()
+    cursor.execute(
+        query,
+        (
+            user_id,
+            amount,
+            category,
+            date,
+            description
+        )
+    )
 
-    return "Expense Added Successfully"
+    conn.commit()
+    conn.close()
+
+    return redirect('/dashboard')
 
 
 # ADD INCOME
-@app.route("/add_income", methods=["POST"])
+@app.route('/add_income', methods=['POST'])
 def add_income():
 
-    user_id = request.form["user_id"]
-    amount = request.form["amount"]
-    source = request.form["source"]
-    date = request.form["date"]
+    user_id = session['user_id']
+    amount = request.form['amount']
+    source = request.form['source']
+    date = request.form['date']
+
+    conn = get_connection()
+    cursor = conn.cursor()
 
     query = """
-    INSERT INTO income (user_id, Amount, source, date)
+    INSERT INTO income
+    (user_id, amount, source, date)
     VALUES (%s,%s,%s,%s)
     """
 
-    cursor.execute(query,(user_id,amount,source,date))
-    db.commit()
+    cursor.execute(
+        query,
+        (user_id, amount, source, date)
+    )
 
-    return "Income Added Successfully"
+    conn.commit()
+    conn.close()
+
+    return redirect('/dashboard')
 
 
 # ANALYTICS
 @app.route("/analytics")
 def analytics():
 
-    df = pd.read_sql("SELECT * FROM expense", db)
+    conn = get_connection()
+
+    df = pd.read_sql(
+        "SELECT * FROM expense",
+        conn
+    )
 
     total_expense = df["amount"].sum()
+
+    conn.close()
 
     return f"Total Expense: {total_expense}"
 
